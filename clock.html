@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ساعة النيون السحابية - Algeria Gold</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0f172a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: white;
+            font-family: sans-serif;
+        }
+
+        /* تصميم الساعة التناظرية */
+        .analog-clock {
+            width: 280px;
+            height: 280px;
+            border: 8px solid #f3ba2f; /* لون ذهبي */
+            border-radius: 50%;
+            position: relative;
+            margin-bottom: 30px;
+            box-shadow: 0 0 25px rgba(243, 186, 47, 0.4);
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            border-radius: 10px;
+            transform: translateX(-50%);
+        }
+        .hour { width: 8px; height: 65px; background: white; }
+        .minute { width: 5px; height: 95px; background: #94a3b8; }
+        .second { width: 2px; height: 115px; background: #ef4444; }
+
+        /* تصميم الساعة الرقمية */
+        .digital-clock {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #f3ba2f;
+            text-shadow: 0 0 15px rgba(243, 186, 47, 0.6);
+            margin-bottom: 20px;
+        }
+
+        /* حالة الاتصال بالسيرفر */
+        #status-box {
+            font-size: 0.9rem;
+            padding: 10px 25px;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #94a3b8;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: 0.5s;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="analog-clock">
+        <div class="hand hour" id="hr"></div>
+        <div class="hand minute" id="mn"></div>
+        <div class="hand second" id="sc"></div>
+    </div>
+
+    <div class="digital-clock" id="digi">00:00:00</div>
+    
+    <div id="status-box">جاري فحص اتصال السيرفر...</div>
+
+    <script>
+        // 1. تحديث الوقت (محلي)
+        function runClock() {
+            const now = new Date();
+            const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+            
+            document.getElementById('digi').innerText = 
+                `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            
+            document.getElementById('sc').style.transform = `translateX(-50%) rotate(${s * 6}deg)`;
+            document.getElementById('mn').style.transform = `translateX(-50%) rotate(${m * 6}deg)`;
+            document.getElementById('hr').style.transform = `translateX(-50%) rotate(${h * 30 + m/2}deg)`;
+        }
+        setInterval(runClock, 1000);
+
+        // 2. الربط بالسيرفر الخارجي باستخدام مفاتيحك
+        const S_URL = 'https://yfubofvfrqgbylexpkun.supabase.co';
+        const S_KEY = 'sb_publishable_7-NokxmI9op2vjkWM1qAyQ_QC5uIgrC';
+
+        async function checkSupabase() {
+            try {
+                const response = await fetch(`${S_URL}/rest/v1/daily_words?limit=1`, {
+                    headers: {
+                        'apikey': S_KEY,
+                        'Authorization': `Bearer ${S_KEY}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const statusBox = document.getElementById('status-box');
+                    statusBox.innerHTML = "متصل بـ AlgeriaGoldApp ✅";
+                    statusBox.style.color = "#4ade80";
+                    statusBox.style.borderColor = "#4ade80";
+                    statusBox.style.background = "rgba(74, 222, 128, 0.1)";
+                } else {
+                    throw new Error();
+                }
+            } catch (err) {
+                const statusBox = document.getElementById('status-box');
+                statusBox.innerHTML = "فشل الاتصال الخارجي ❌";
+                statusBox.style.color = "#f87171";
+            }
+        }
+
+        checkSupabase();
+    </script>
+</body>
+</html>
